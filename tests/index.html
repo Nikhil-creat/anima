@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Anima · Unit tests</title>
+<style>body{font:16px/1.6 system-ui,sans-serif;max-width:720px;margin:40px auto;padding:0 20px;background:#E3EAE6;color:#0D1A17}
+li{font-family:ui-monospace,Menlo,monospace;font-size:14px;list-style:none;margin:4px 0}.ok::before{content:"✔ ";color:#0B7F6E}.bad::before{content:"✘ ";color:#c0233f}
+h1{margin:0 0 6px}a{color:#0B7F6E}</style></head>
+<body><h1>Anima unit tests</h1><p id="sum" role="status">Running…</p><ul id="out"></ul><p><a href="../index.html">Back to the lab</a></p>
+<script src="../assets/js/core.js"></script><script src="cases.js"></script>
+<script>
+let fail=0;const out=document.getElementById('out');
+CASES.forEach(([n,f])=>{const li=document.createElement('li');try{f();li.className='ok';li.textContent=n;}catch(e){fail++;li.className='bad';li.textContent=n+' — '+e.message;}out.appendChild(li);});
+document.getElementById('sum').textContent=fail?`${fail} of ${CASES.length} failed`:`All ${CASES.length} tests passed`;
+</script></body></html>

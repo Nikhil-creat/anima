@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Anima — A GPU laboratory for artificial life</title>
+<meta name="description" content="Anima runs continuous cellular automata on your GPU with WebGL2, maps where self-organizing life exists in parameter space, and breeds new genomes with an evolutionary search. Runs entirely in your browser.">
+<meta name="author" content="Nikhil Chary Sriramoju">
+<meta property="og:title" content="Anima — A GPU laboratory for artificial life">
+<meta property="og:description" content="Real-time continuous cellular automata on WebGL2, a phase map of where life exists, and an evolutionary genome search. Runs entirely in the browser.">
+<meta property="og:type" content="website">
+<meta name="theme-color" content="#04070F">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='26' fill='%2304070F'/%3E%3Ccircle cx='50' cy='50' r='26' fill='none' stroke='%2319C3B1' stroke-width='9'/%3E%3Ccircle cx='50' cy='50' r='9' fill='%23FF4F73'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;800&family=Instrument+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <a class="brand" href="#top"><i aria-hidden="true"></i>Anima</a>
+    <nav><a href="#lab">Lab</a><a class="hs" href="#rule">The rule</a><a class="hs" href="#search">Search</a><a class="hs" href="#repo">Repository</a><a href="#author">Author</a></nav>
+  </header>
+
+  <div id="top">
+    <h1>A petri dish made of math.</h1>
+    <p class="lede">Anima simulates continuous cellular automata on your graphics card, maps where self-organizing life can exist, and breeds new genomes to find it. Paint into the dish, then watch what the rule does with your mark.</p>
+  </div>
+
+  <div class="nogl" id="nogl" role="alert"><b>WebGL2 with float rendering is required.</b> This browser or device doesn't support it. Try a current desktop Chrome, Edge, Firefox or Safari.</div>
+
+  <main id="lab" class="lab">
+    <div>
+      <div class="dishwrap"><canvas id="dish" width="800" height="800" aria-label="Live simulation dish. Click or drag to paint."></canvas></div>
+      <div class="bar">
+        <button class="btn" id="play">Pause</button>
+        <button class="btn o" id="step">Step</button>
+        <button class="btn o" id="reseed">Reseed</button>
+        <button class="btn o" id="clear">Clear</button>
+        <span class="seg" role="group" aria-label="Brush mode"><button id="m-add" aria-pressed="true">Add</button><button id="m-erase" aria-pressed="false">Erase</button></span>
+      </div>
+      <div class="stats" aria-live="off">
+        <div><b id="s-mass">–</b><span>mass</span></div>
+        <div><b id="s-cov">–</b><span>coverage</span></div>
+        <div><b id="s-act">–</b><span>activity</span></div>
+        <div><b id="s-taps">–</b><span>kernel taps / step</span></div>
+      </div>
+      <canvas id="spark" width="600" height="54" aria-label="Mass over time"></canvas>
+      <p class="hint">If the dish goes dark, life didn't hold with this genome. Try a preset, drag the sliders, or press Discover.</p>
+      <div class="bar">
+        <button class="btn o" id="png">Save image</button>
+        <button class="btn o" id="link">Copy shareable link</button>
+        <span class="hint" id="toast" role="status"></span>
+      </div>
+    </div>
+
+    <div>
+      <div class="panel">
+        <h2>Genome</h2>
+        <div class="sl"><label for="g-R">Radius</label><input id="g-R" data-k="R" type="range" min="6" max="15" step="1"><output></output></div>
+        <div class="sl"><label for="g-mu">Growth centre μ</label><input id="g-mu" data-k="mu" type="range" min="0.05" max="0.40" step="0.001"><output></output></div>
+        <div class="sl"><label for="g-sigma">Growth width σ</label><input id="g-sigma" data-k="sigma" type="range" min="0.005" max="0.08" step="0.0005"><output></output></div>
+        <div class="sl"><label for="g-dt">Time step</label><input id="g-dt" data-k="dt" type="range" min="0.02" max="0.3" step="0.01"><output></output></div>
+        <div class="sl"><label for="g-b0">Ring 1</label><input id="g-b0" data-k="b0" type="range" min="0" max="1" step="0.05"><output></output></div>
+        <div class="sl"><label for="g-b1">Ring 2</label><input id="g-b1" data-k="b1" type="range" min="0" max="1" step="0.05"><output></output></div>
+        <div class="sl"><label for="g-b2">Ring 3</label><input id="g-b2" data-k="b2" type="range" min="0" max="1" step="0.05"><output></output></div>
+        <div class="sl"><label for="speed">Speed</label><input id="speed" type="range" min="1" max="6" step="1" value="2"><output></output></div>
+        <div class="row">
+          <label for="grid">Grid</label>
+          <select id="grid"><option>128</option><option selected>192</option><option>256</option></select>
+          <label for="pattern">Seed</label>
+          <select id="pattern"><option value="soup">Soup</option><option value="blobs">Blobs</option></select>
+          <input id="seed" type="number" min="0" max="99999" aria-label="Random seed" style="width:84px">
+        </div>
+        <div class="row"><span class="hint">Starting genomes:</span>
+          <button class="btn o" data-pre="glider">Glider habitat</button>
+          <button class="btn o" data-pre="broad">Broad growth</button>
+          <button class="btn o" data-pre="rings">Triple ring</button></div>
+      </div>
+
+      <div class="panel">
+        <h2>Phase map of life</h2>
+        <canvas id="map" width="480" height="480" aria-label="Map of outcomes across growth centre and width. Click a cell to load that genome."></canvas>
+        <div class="axis"><span>μ 0.08</span><span>growth centre →</span><span>0.32</span></div>
+        <div class="legend"><span><i style="background:#D5DDD9"></i>extinct</span><span><i style="background:#A9BCD6"></i>static</span><span><i style="background:#F0A3AE"></i>saturated</span><span><i style="background:#3FC7A8"></i>alive (darker = better)</span></div>
+        <div class="row"><button class="btn" id="survey">Survey 144 genomes</button><button class="btn o" id="discover">Discover</button><button class="btn o" id="export" disabled>Export CSV</button><button class="btn o" id="stop" hidden>Stop</button></div>
+        <progress id="prog" value="0" max="1" hidden></progress>
+        <ol id="log" aria-live="polite"></ol>
+        <p class="hint">Each trial reseeds the dish and runs 300 steps on the GPU. The dish shows the trial as it happens.</p>
+      </div>
+
+      <div class="panel">
+        <h2>Genome library</h2>
+        <div class="row" style="margin-top:0"><input id="libname" type="text" placeholder="Name this genome" maxlength="40" aria-label="Genome name" style="flex:1;min-width:130px"><button class="btn" id="libsave">Save</button></div>
+        <ul id="lib" class="lib" aria-live="polite"></ul>
+        <div class="row"><button class="btn o" id="libexport">Export JSON</button><label class="btn o" for="libimport" style="cursor:pointer">Import JSON</label><input id="libimport" type="file" accept="application/json" hidden></div>
+        <p class="hint">Saved in this browser only. Export to keep a backup or share.</p>
+      </div>
+
+      <div class="panel">
+        <h2>Performance</h2>
+        <dl class="kv"><dt>GPU</dt><dd id="b-gpu">–</dd><dt>Steps / s</dt><dd id="b-sps">–</dd><dt>Kernel throughput</dt><dd id="b-taps">–</dd></dl>
+        <div class="row" style="margin-top:0"><button class="btn o" id="bench">Run benchmark</button></div>
+        <p class="hint">Times 200 simulation steps at the current genome and grid size.</p>
+      </div>
+    </div>
+  </main>
+</div>
+
+<section class="s" id="rule"><div class="wrap two">
+  <div>
+    <h2>One rule, no scripts</h2>
+    <p>Every cell holds a number between 0 and 1. Each step, a cell looks at a ring of neighbours, averages them with a smooth kernel, and asks whether that average is in a comfortable range. If it is, the cell grows. If not, it shrinks.</p>
+    <p>Nothing here is animated by hand. Anything that moves, splits or holds its shape emerges from that loop and your genome.</p>
+  </div>
+  <pre class="eq"><span class="k">U</span>  = (K ∗ A) / Σ K          <span class="k">// ring-shaped kernel</span>
+<span class="c">G</span>(U) = 2·exp(−(U − μ)² / 2σ²) − 1
+A  ← clamp(A + Δt · <span class="c">G</span>(U), 0, 1)
+
+K(r) = exp(4 − 1 / (r(1 − r)))  <span class="k">// per ring</span></pre>
+</div></section>
+
+<section class="s" id="search"><div class="wrap two">
+  <div>
+    <h2>Finding life is a search problem</h2>
+    <p>Most genomes die out, blow up into static, or freeze. Life lives in thin bands of parameter space. Anima looks for them two ways.</p>
+    <p><b>Survey</b> tests a 12 × 12 grid of growth centre and width, using the same seed for every cell, and paints the outcome onto the phase map. <b>Discover</b> is a mutation-and-selection loop that starts from your current genome and climbs toward higher scores.</p>
+  </div>
+  <ol class="steps">
+    <li><b>Trial</b><span>Reseed with a fixed random seed, then run 300 steps on the GPU.</span></li>
+    <li><b>Measure</b><span>Read back mass, coverage and activity at the halfway point and the end.</span></li>
+    <li><b>Classify</b><span>Extinct, saturated, static or alive. Alive genomes are scored for steady mass, compact structures and ongoing motion.</span></li>
+    <li><b>Select</b><span>Discover mutates the radius, growth curve and ring weights, keeps the best child, and repeats for ten generations.</span></li>
+  </ol>
+</div></section>
+
+<section class="s"><div class="wrap two">
+  <div>
+    <h2>Under the hood</h2>
+    <p>The simulation state lives in 32-bit float textures. A fragment shader computes each cell's kernel sum, and two textures swap roles every step. At the default settings that is tens of millions of texture reads per step, done in parallel.</p>
+    <p>Everything is static files with no framework, no build step and no server, so it runs on GitHub Pages as is. Genomes are shareable through the link button, which stores them in the URL.</p>
+  </div>
+  <div id="limits">
+    <h2>Honest limits</h2>
+    <p class="note">The automaton is Lenia, created by Bert Wang-Chak Chan. Anima's contribution is the interactive GPU implementation, the phase-map survey and the evolutionary search. The alive-or-not classifier is a heuristic, so a low score doesn't prove a genome is uninteresting, and results depend on the seed. Trials and the survey also depend on your GPU speed.</p>
+  </div>
+</div></section>
+
+<section class="s" id="repo"><div class="wrap two">
+  <div>
+    <h2>Built like software, not a demo</h2>
+    <p>Anima is an open repository with a tested core, continuous integration and automatic deployment. Every push runs the unit tests, and only a passing build is published to GitHub Pages.</p>
+    <p>The pure logic (kernel maths, seeding, the life classifier) lives in one dependency-free file, so the same code runs in the browser, in the test page and in CI. Testing found a real defect in an earlier version: single-ring genomes used only the inner third of the kernel radius. It is fixed and covered by tests.</p>
+  </div>
+  <pre class="eq"><span class="k">anima/</span>
+├─ index.html              <span class="k">// the lab</span>
+├─ assets/
+│  ├─ css/style.css
+│  └─ js/
+│     ├─ core.js           <span class="k">// pure, tested logic</span>
+│     └─ app.js            <span class="k">// WebGL2 + UI</span>
+├─ tests/                  <span class="k">// browser + Node runner</span>
+├─ docs/                   <span class="k">// architecture, method</span>
+├─ .github/workflows/      <span class="k">// test → deploy</span>
+├─ CITATION.cff  LICENSE  README.md</pre>
+</div></section>
+
+<section class="s" id="author"><div class="wrap">
+  <h2>About the author</h2>
+  <div class="two">
+    <div>
+      <p><b>Nikhil Chary Sriramoju</b> is a final-year B.Tech student in Computer Science and Engineering. He builds systems that sit between graphics, AI and security, and made Anima as a major project to show GPU programming, experiment design and clean engineering in one place.</p>
+      <p class="links"><a href="https://github.com/Nikhil-creat">GitHub</a> · <a href="https://in.linkedin.com/in/nikhil-chary-sriramoju-95041b38a">LinkedIn</a> · <a href="mailto:sriramojunikhil66@gmail.com">sriramojunikhil66@gmail.com</a></p>
+    </div>
+    <div class="certs">
+      <details open><summary>Virtual job simulations (Forage)</summary><ul>
+        <li>Software Engineer at a Start Up</li><li>Technology Consulting, PwC</li><li>Cyber Security Consulting, PwC</li>
+        <li>Automation AI Accelerator, Datacom</li><li>Cyber Security Operations, Datacom</li><li>Cyber Security Global Virtual Internship, Clifford Chance</li>
+        <li>Data Science, British Airways</li><li>Data and Technology Transactions, Latham &amp; Watkins</li>
+        <li>Data Analytics, Deloitte</li><li>Technology, Deloitte</li></ul></details>
+      <details><summary>NASSCOM / Skill India Digital Hub</summary><ul>
+        <li>IT Forensic Analyst</li><li>Product Manager, Web &amp; Mobile</li><li>Cloud Infrastructure Analyst</li><li>Analyst Endpoint Security, Cybersecurity</li><li>Blockchain Architect</li></ul></details>
+      <details><summary>Programmes and internship</summary><ul>
+        <li>Data Analytics internship, Thiranex</li><li>Industry 4.0 Robotics Systems, Reliance Foundation Skilling Academy (90 hours)</li>
+        <li>IoT Security Specialist, Reliance Foundation Skilling Academy</li><li>AI-Machine Learning Engineer Foundation, Reliance Foundation Skilling Academy</li>
+        <li>Yuva AI for All, NIELIT / Skill India (NSQF Level 2)</li><li>Mastering Power BI, PHN Technology</li><li>How to Get a Job, UNICEF Yuwaah</li></ul></details>
+    </div>
+  </div>
+</div></section>
+
+<footer><div class="wrap">
+  <span>Anima v1.0.0 · MIT licensed · © 2026 Nikhil Chary Sriramoju</span>
+  <span><a href="https://github.com/Nikhil-creat/anima">Source</a> · <a href="tests/index.html">Run tests</a> · <a href="https://github.com/Nikhil-creat">GitHub</a> · <a href="https://in.linkedin.com/in/nikhil-chary-sriramoju-95041b38a">LinkedIn</a></span>
+</div></footer>
+
+<script src="assets/js/core.js"></script>
+<script src="assets/js/app.js"></script>
+</body>
+</html>

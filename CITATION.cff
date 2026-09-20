@@ -1,0 +1,25 @@
+cff-version: 1.2.0
+message: "If you use Anima, please cite it as below."
+title: "Anima: A GPU laboratory for artificial life"
+version: 1.0.0
+date-released: 2026-09-19
+type: software
+license: MIT
+authors:
+  - family-names: Sriramoju
+    given-names: Nikhil Chary
+repository-code: "https://github.com/Nikhil-creat/anima"
+url: "https://Nikhil-creat.github.io/anima/"
+keywords: [artificial life, cellular automata, Lenia, WebGL2, evolutionary search]
+references:
+  - type: article
+    title: "Lenia: Biology of Artificial Life"
+    authors:
+      - family-names: Chan
+        given-names: Bert Wang-Chak
+    journal: "Complex Systems"
+    volume: 28
+    issue: 3
+    start: 251
+    end: 286
+    year: 2019
