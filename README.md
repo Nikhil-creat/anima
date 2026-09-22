@@ -7,6 +7,16 @@
 
 **Live demo:** https://Nikhil-creat.github.io/anima/
 
+## Designed and developed by 
+# **★NIKHIL CHARY SRIRAMOJU★**
+BTech CSE (Final Year)
+
+- GitHub: [Nikhil-creat](https://github.com/Nikhil-creat)
+- LinkedIn: [nikhil-chary-sriramoju](https://in.linkedin.com/in/nikhil-chary-sriramoju-95041b38a)
+- Email: sriramojunikhil66@gmail.com
+- Instagram: [@nikhil__sriramoju](https://www.instagram.com/nikhil__sriramoju)
+- Facebook: [Profile](https://www.facebook.com/profile.php?id=100079201124141)
+
 Anima simulates continuous cellular automata ([Lenia](https://arxiv.org/abs/1812.05433)) on the GPU with WebGL2,
 maps where self-organizing life exists in parameter space, and breeds new genomes with an evolutionary search.
 Everything runs in the browser. There is no server, no framework and no build step.
@@ -70,17 +80,6 @@ a heuristic, and outcomes depend on the random seed and the number of trial step
 - Kernel and growth-function editor
 - Larger grids using tiled rendering
 - A short study of how often each region of the phase map is alive across many seeds
-
-## Author
-
-**★NIKHIL CHARY SRIRAMOJU★**
-BTech CSE (Final Year)
-
-- GitHub: [Nikhil-creat](https://github.com/Nikhil-creat)
-- LinkedIn: [nikhil-chary-sriramoju](https://in.linkedin.com/in/nikhil-chary-sriramoju-95041b38a)
-- Email: sriramojunikhil66@gmail.com
-- Instagram: [@nikhil__sriramoju](https://www.instagram.com/nikhil__sriramoju)
-- Facebook: [Profile](https://www.facebook.com/profile.php?id=100079201124141)
 
 ## Citation
 
